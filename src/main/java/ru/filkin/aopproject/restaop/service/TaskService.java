@@ -37,13 +37,8 @@ public class TaskService {
     }
 
     public Task updateTask(int id, String title, String description, int userId){
-        Optional<Task> taskOptional = taskRepository.findById(id);
+        Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
 
-        if(taskOptional.isEmpty()){
-            throw new NotFoundException("Task not found");
-        }
-
-        Task task = taskOptional.get();
         task.setTitle(title);
         task.setDescription(description);
         task.setUserId(userId);
