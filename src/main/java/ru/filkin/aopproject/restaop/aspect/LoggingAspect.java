@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Slf4j
 public class LoggingAspect {
+
     @Pointcut("execution(* ru.filkin.aopproject.restaop.service.*.*(..))")
     public void serviceMethods(){
     }
@@ -30,16 +31,23 @@ public class LoggingAspect {
     @AfterThrowing(value = "serviceMethods()", throwing = "exception")
     public void logMethodException(JoinPoint joinPoint, Exception exception){
         String methodName = joinPoint.getSignature().getName();
-        log.info("Service: Метод {}, выбросил исключение {}", methodName, exception.getMessage());
+        log.error("Service: Метод {} выбросил исключение {}", methodName, exception.getMessage());
     }
 
     @Around("serviceMethods()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         Long startTime = System.currentTimeMillis();
-        Object result = joinPoint.proceed();
+        Object result;
+        try{
+            result = joinPoint.proceed();
+        } catch(Exception e){
+            Long resultTime = System.currentTimeMillis() - startTime;
+            log.info("Service: Метод {} выполнен за {} мс с исключением", methodName, resultTime);
+            throw e;
+        }
         Long resultTime = System.currentTimeMillis() - startTime;
-        log.info("Service: Метод {} выполнен за {}", methodName, resultTime);
+        log.info("Service: Метод {} выполнен за {} мс", methodName, resultTime);
         return result;
     }
 
