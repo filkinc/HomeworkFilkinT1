@@ -6,10 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.filkin.aopproject.restaop.exception.NotFoundException;
 import ru.filkin.aopproject.restaop.model.Task;
+import ru.filkin.aopproject.restaop.model.TaskDTO;
 import ru.filkin.aopproject.restaop.repository.TaskRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -20,30 +22,35 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public Task createTask(String title, String description){
-        Task task = Task.builder()
-                .title(title)
-                .description(description)
-                .build();
-        return taskRepository.save(task);
+    public TaskDTO createTask(TaskDTO taskDTO) {
+        Task task = new Task();
+        task.setTitle(taskDTO.getTitle());
+        task.setDescription(taskDTO.getDescription());
+        task.setUserId(taskDTO.getUserId());
+        Task savedTask = taskRepository.save(task);
+        return convertToDTO(savedTask);
     }
 
-    public Task getTaskById(int id){
-        return taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
+    public TaskDTO getTaskById(int id){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Task not found"));
+        return convertToDTO(task);
     }
 
-    public List<Task> getAllTasks(){
-        return taskRepository.findAll();
+    public List<TaskDTO> getAllTasks(){
+        return taskRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Task updateTask(int id, String title, String description, int userId){
-        Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
-
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setUserId(userId);
-
-        return taskRepository.save(task);
+    public TaskDTO updateTask(int id, TaskDTO taskDTO) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+        task.setTitle(taskDTO.getTitle());
+        task.setDescription(taskDTO.getDescription());
+        task.setUserId(taskDTO.getUserId());
+        Task updatedTask = taskRepository.save(task);
+        return convertToDTO(updatedTask);
     }
 
     public void deleteTask(int id){
@@ -51,5 +58,22 @@ public class TaskService {
             throw new NotFoundException("Task not found");
         }
         taskRepository.deleteById(id);
+    }
+
+    private TaskDTO convertToDTO(Task task) {
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setId(task.getId());
+        taskDTO.setTitle(task.getTitle());
+        taskDTO.setDescription(task.getDescription());
+        taskDTO.setUserId(task.getUserId());
+        return taskDTO;
+    }
+
+    private Task convertToEntity(TaskDTO taskDTO) {
+        Task task = new Task();
+        task.setTitle(taskDTO.getTitle());
+        task.setDescription(taskDTO.getDescription());
+        task.setUserId(taskDTO.getUserId());
+        return task;
     }
 }

@@ -3,7 +3,7 @@ package ru.filkin.aopproject.restaop.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.filkin.aopproject.restaop.model.Task;
+import ru.filkin.aopproject.restaop.model.TaskDTO;
 import ru.filkin.aopproject.restaop.service.TaskService;
 
 import java.util.List;
@@ -20,23 +20,23 @@ public class TaskController {
     }
 
     @PostMapping
-    public Task createTask(@RequestParam String title, @RequestParam String description) {
-        return taskService.createTask(title, description);
+    public TaskDTO createTask(@RequestBody TaskDTO taskDTO) {
+        return taskService.createTask(taskDTO);
     }
 
     @GetMapping("/{id}")
-    public Task getTaskById(@PathVariable int id) {
+    public TaskDTO getTaskById(@PathVariable int id) {
         return taskService.getTaskById(id);
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
+    public List<TaskDTO> getAllTasks() {
         return taskService.getAllTasks();
     }
 
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable int id, @RequestParam String title, @RequestParam String description, @RequestParam int userId) {
-        return taskService.updateTask(id, title, description, userId);
+    public TaskDTO updateTask(@PathVariable int id, @RequestBody TaskDTO taskDTO) {
+        return taskService.updateTask(id, taskDTO);
     }
 
     @DeleteMapping("/{id}")
