@@ -1,0 +1,10 @@
+spring:
+    application:
+        name: restAop
+    sql:
+        init:
+            mode: always
+    datasource:
+        url: jdbc:postgresql://localhost:5432/Tasks
+        username: postgres
+        password: filds17A
