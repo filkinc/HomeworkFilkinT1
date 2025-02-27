@@ -8,3 +8,7 @@ spring:
         url: jdbc:postgresql://localhost:5432/Tasks
         username: postgres
         password: filds17A
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update
