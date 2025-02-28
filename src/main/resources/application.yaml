@@ -12,3 +12,8 @@ spring:
     jpa:
         hibernate:
             ddl-auto: update
+    kafka:
+        bootstrap-servers: kafka:9092
+        consumer:
+            group-id: my-group
+            auto-offset-reset: earliest
