@@ -26,20 +26,6 @@ services:
     depends_on:
       - zookeeper
 
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - kafka
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tasks
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: filds17A
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    networks:
-      - app-network
-
   db:
     image: postgres:17
     container_name: postgres_db
