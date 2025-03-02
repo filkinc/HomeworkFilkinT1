@@ -53,9 +53,12 @@ public class TaskService {
 
     public TaskDTO updateTask(int id, TaskDTO taskDTO) {
 
-        kafkaProducer.sendTaskUpdate(id, taskDTO.getStatus());
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (!taskDTO.getStatus().equals(task.getStatus())) {
+            kafkaProducer.sendTaskUpdate(id, taskDTO.getStatus());
+        }
 
         task.setTitle(taskDTO.getTitle());
         task.setDescription(taskDTO.getDescription());

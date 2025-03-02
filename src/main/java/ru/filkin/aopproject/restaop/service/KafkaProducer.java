@@ -20,6 +20,5 @@ public class KafkaProducer {
     public void sendTaskUpdate(int taskId, String newStatus) {
         String message = taskId + ":" + newStatus;
         kafkaTemplate.send(TOPIC, String.valueOf(taskId), message);
-        System.out.println("Sent message: " + message);
     }
 }
