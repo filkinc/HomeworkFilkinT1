@@ -12,8 +12,27 @@ spring:
     jpa:
         hibernate:
             ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
     kafka:
         bootstrap-servers: localhost:29092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
         consumer:
             group-id: my-group
             auto-offset-reset: earliest
+            max-poll-records: 1
+    mail:
+        host: smtp.mail.ru
+        port: 465
+        username: filkin_test_address@mail.ru
+        password: mDEUFrq2nJ4S5hj8QaJ4
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    ssl:
+                        enable: true
