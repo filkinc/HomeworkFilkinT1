@@ -1,18 +1,19 @@
 package ru.filkin.aopproject.restaop.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.filkin.aopproject.restaop.exception.NotFoundException;
+import ru.filkin.aopproject.restaop.kafka.KafkaProducer;
+import ru.filkin.aopproject.restaop.kafka.TaskUpdateEvent;
 import ru.filkin.aopproject.restaop.model.Task;
 import ru.filkin.aopproject.restaop.model.TaskDTO;
 import ru.filkin.aopproject.restaop.repository.TaskRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
@@ -56,15 +57,18 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        if (!taskDTO.getStatus().equals(task.getStatus())) {
-            kafkaProducer.sendTaskUpdate(id, taskDTO.getStatus());
-        }
+        boolean statusChanged = !taskDTO.getStatus().equals(task.getStatus());
 
         task.setTitle(taskDTO.getTitle());
         task.setDescription(taskDTO.getDescription());
         task.setUserId(taskDTO.getUserId());
         task.setStatus(taskDTO.getStatus());
         Task updatedTask = taskRepository.save(task);
+
+        if (statusChanged) {
+            TaskUpdateEvent event = new TaskUpdateEvent(id, taskDTO.getStatus());
+            kafkaProducer.sendTaskUpdate(event);
+        }
         return convertToDTO(updatedTask);
     }
 

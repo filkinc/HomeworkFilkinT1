@@ -1,11 +1,8 @@
 package ru.filkin.aopproject.restaop.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.filkin.aopproject.restaop.model.TaskDTO;
-import ru.filkin.aopproject.restaop.service.KafkaConsumer;
-import ru.filkin.aopproject.restaop.service.KafkaProducer;
 import ru.filkin.aopproject.restaop.service.TaskService;
 
 import java.util.List;
