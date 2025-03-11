@@ -13,7 +13,7 @@ public class KafkaProducer {
     private final KafkaTemplate<String, TaskUpdateEvent> kafkaTemplate;
 
     @Value("${spring.kafka.topic.name}")
-    private String TOPIC;
+    private String topic;
 
     public KafkaProducer(KafkaTemplate<String, TaskUpdateEvent> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
@@ -21,6 +21,6 @@ public class KafkaProducer {
 
     public void sendTaskUpdate(TaskUpdateEvent event) {
         log.info("Sending task update event: {}", event);
-        kafkaTemplate.send(TOPIC, event);
+        kafkaTemplate.send(topic, event);
     }
 }
