@@ -12,35 +12,23 @@ import org.springframework.beans.factory.annotation.Value;
 public class NotificationService {
 
     private final JavaMailSender mailSender;
-    private final String fromEmail;
-    private final String toEmail;
-    private final String emailSubject;
-    private final String emailTextTemplate;
+    private final ConfigurationMail configurationMail;
 
 
-    public NotificationService(
-            JavaMailSender mailSender,
-            @Value("${spring.mail.from}") String fromEmail,
-            @Value("${spring.mail.to}") String toEmail,
-            @Value("${spring.mail.subject}") String emailSubject,
-            @Value("${spring.mail.text}") String emailTextTemplate
-    ) {
+    public NotificationService(JavaMailSender mailSender, ConfigurationMail configurationMail) {
         this.mailSender = mailSender;
-        this.fromEmail = fromEmail;
-        this.toEmail = toEmail;
-        this.emailSubject = emailSubject;
-        this.emailTextTemplate = emailTextTemplate;
+        this.configurationMail = configurationMail;
     }
 
     public void sendNotification(TaskUpdateEvent event) {
         log.info("Sending notification: Task ID={}, New Status={}", event.getId(), event.getNewStatus());
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(toEmail);
-        message.setSubject(emailSubject);
+        message.setFrom(configurationMail.getFrom());
+        message.setTo(configurationMail.getTo());
+        message.setSubject(configurationMail.getSubject());
 
-        String emailText = String.format(emailTextTemplate, event.getId(), event.getNewStatus());
+        String emailText = String.format(configurationMail.getText(), event.getId(), event.getNewStatus());
         message.setText(emailText);
 
         try {
