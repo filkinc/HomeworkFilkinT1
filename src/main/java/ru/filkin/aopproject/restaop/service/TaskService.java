@@ -9,6 +9,7 @@ import ru.filkin.aopproject.restaop.kafka.TaskUpdateEvent;
 import ru.filkin.aopproject.restaop.model.Task;
 import ru.filkin.aopproject.restaop.model.TaskDTO;
 import ru.filkin.aopproject.restaop.repository.TaskRepository;
+import ru.filkin.starter.loggingspringbootstarter.annotation.CustomAnnotation;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class TaskService {
         this.kafkaProducer = kafkaProducer;
     }
 
+    @CustomAnnotation
     public TaskDTO createTask(TaskDTO taskDTO) {
         Task task = new Task();
         task.setTitle(taskDTO.getTitle());
@@ -40,6 +42,7 @@ public class TaskService {
         return convertToDTO(savedTask);
     }
 
+    @CustomAnnotation
     public TaskDTO getTaskById(int id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Task not found"));
@@ -52,6 +55,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @CustomAnnotation
     public TaskDTO updateTask(int id, TaskDTO taskDTO) {
 
         Task task = taskRepository.findById(id)
@@ -72,6 +76,7 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
+    @CustomAnnotation
     public void deleteTask(int id) {
         if (!taskRepository.existsById(id)) {
             throw new NotFoundException("Task not found");

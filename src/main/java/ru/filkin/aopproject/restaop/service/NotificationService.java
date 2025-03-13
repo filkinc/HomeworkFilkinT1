@@ -6,6 +6,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import ru.filkin.aopproject.restaop.kafka.TaskUpdateEvent;
 import org.springframework.beans.factory.annotation.Value;
+import ru.filkin.starter.loggingspringbootstarter.annotation.CustomAnnotation;
 
 @Slf4j
 @Service
@@ -20,6 +21,7 @@ public class NotificationService {
         this.configurationMail = configurationMail;
     }
 
+    @CustomAnnotation
     public void sendNotification(TaskUpdateEvent event) {
         log.info("Sending notification: Task ID={}, New Status={}", event.getId(), event.getNewStatus());
 
