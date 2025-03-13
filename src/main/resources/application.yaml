@@ -8,3 +8,32 @@ spring:
         url: jdbc:postgresql://localhost:5432/Tasks
         username: postgres
         password: filds17A
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+    kafka:
+        bootstrap-servers: localhost:29092
+        topic:
+            name: tasks-topic
+        consumer:
+            group-id: task-group
+    mail:
+        from: filkin_test_address@mail.ru
+        to: filkin_test_address@mail.ru
+        subject: "Task Status Updated"
+        text: "Task ID: %d\nNew Status: %s"
+        host: smtp.mail.ru
+        port: 465
+        username: filkin_test_address@mail.ru
+        password: mDEUFrq2nJ4S5hj8QaJ4
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    ssl:
+                        enable: true
