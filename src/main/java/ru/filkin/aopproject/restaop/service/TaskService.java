@@ -8,7 +8,6 @@ import ru.filkin.aopproject.restaop.kafka.KafkaProducer;
 import ru.filkin.aopproject.restaop.kafka.TaskUpdateEvent;
 import ru.filkin.aopproject.restaop.model.Task;
 import ru.filkin.aopproject.restaop.model.TaskDTO;
-import ru.filkin.aopproject.restaop.model.TaskMapper;
 import ru.filkin.aopproject.restaop.repository.TaskRepository;
 import ru.filkin.starter.loggingspringbootstarter.annotation.CustomAnnotation;
 
@@ -33,13 +32,6 @@ public class TaskService {
         this.kafkaProducer = kafkaProducer;
     }
 
-    private TaskMapper taskMapper;
-
-    @Autowired
-    public void setTaskMapper(TaskMapper taskMapper) {
-        this.taskMapper = taskMapper;
-    }
-
     @CustomAnnotation
     public TaskDTO createTask(TaskDTO taskDTO) {
         Task task = new Task();
@@ -48,19 +40,19 @@ public class TaskService {
         task.setUserId(taskDTO.getUserId());
         task.setStatus(taskDTO.getStatus());
         Task savedTask = taskRepository.save(task);
-        return taskMapper.convertToDTO(savedTask);
+        return convertToDTO(savedTask);
     }
 
     @CustomAnnotation
     public TaskDTO getTaskById(int id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Task not found"));
-        return taskMapper.convertToDTO(task);
+        return convertToDTO(task);
     }
 
     public List<TaskDTO> getAllTasks() {
         return taskRepository.findAll().stream()
-                .map(taskMapper::convertToDTO)
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -82,7 +74,7 @@ public class TaskService {
             TaskUpdateEvent event = new TaskUpdateEvent(id, taskDTO.getStatus());
             kafkaProducer.sendTaskUpdate(event);
         }
-        return taskMapper.convertToDTO(updatedTask);
+        return convertToDTO(updatedTask);
     }
 
     @CustomAnnotation
@@ -91,5 +83,25 @@ public class TaskService {
             throw new NotFoundException("Task not found");
         }
         taskRepository.deleteById(id);
+    }
+
+    private TaskDTO convertToDTO(Task task) {
+        return TaskDTO.builder()
+                .id(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .userId(task.getUserId())
+                .status(task.getStatus())
+                .build();
+    }
+
+    private Task convertToEntity(TaskDTO taskDTO) {
+        return Task.builder()
+                .id(taskDTO.getId())
+                .title(taskDTO.getTitle())
+                .description(taskDTO.getDescription())
+                .userId(taskDTO.getUserId())
+                .status(taskDTO.getStatus())
+                .build();
     }
 }
