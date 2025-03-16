@@ -16,12 +16,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
@@ -67,6 +67,13 @@ class TaskServiceTest {
         assertThat(result.getDescription()).isEqualTo("Description");
         assertThat(result.getUserId()).isEqualTo(10);
         assertThat(result.getStatus()).isEqualTo("In Progress");
+
+        verify(taskRepository).save(argThat(task ->
+                task.getTitle().equals("Test Task") &&
+                        task.getDescription().equals("Description") &&
+                        task.getUserId() == 10 &&
+                        task.getStatus().equals("In Progress")
+        ));
     }
 
     @Test
@@ -96,9 +103,8 @@ class TaskServiceTest {
 
         given(taskRepository.findById(1)).willReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> {
-            taskService.getTaskById(1);
-        });
+        assertThatThrownBy(() -> taskService.getTaskById(1))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -128,6 +134,8 @@ class TaskServiceTest {
         assertThat(result.get(0).getTitle()).isEqualTo("Task 1");
         assertThat(result.get(1).getId()).isEqualTo(2);
         assertThat(result.get(1).getTitle()).isEqualTo("Task 2");
+
+        verify(taskRepository).findAll();
     }
 
     @Test
@@ -165,8 +173,33 @@ class TaskServiceTest {
         assertThat(result.getUserId()).isEqualTo(123);
         assertThat(result.getStatus()).isEqualTo("Done");
 
+        verify(taskRepository).save(task);
         verify(kafkaProducer).sendTaskUpdate(argThat(event ->
                 event.getId() == 1 && "Done".equals(event.getNewStatus())));
+    }
+
+    @Test
+    public void whenUpdateTaskWithoutStatusChange_thenNoKafkaMessage() {
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setTitle("Updated Task");
+        taskDTO.setDescription("Updated Description");
+        taskDTO.setUserId(123);
+        taskDTO.setStatus("In Progress"); // Статус не изменён
+
+        Task task = new Task();
+        task.setId(1);
+        task.setTitle("Test Task");
+        task.setDescription("Description");
+        task.setUserId(123);
+        task.setStatus("In Progress");
+
+        given(taskRepository.findById(1)).willReturn(Optional.of(task));
+        given(taskRepository.save(task)).willReturn(task);
+
+        TaskDTO result = taskService.updateTask(1, taskDTO);
+
+        assertThat(result).isNotNull();
+        verify(kafkaProducer, never()).sendTaskUpdate(any());
     }
 
     @Test
@@ -177,6 +210,7 @@ class TaskServiceTest {
         taskService.deleteTask(1);
 
         verify(taskRepository).deleteById(1);
+        verify(taskRepository).existsById(1);
     }
 
     @Test
@@ -184,8 +218,7 @@ class TaskServiceTest {
 
         given(taskRepository.existsById(1)).willReturn(false);
 
-        assertThrows(NotFoundException.class, () -> {
-            taskService.deleteTask(1);
-        });
+        assertThatThrownBy(() -> taskService.deleteTask(1))
+                .isInstanceOf(NotFoundException.class);
     }
 }
