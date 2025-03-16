@@ -37,3 +37,7 @@ spring:
                     auth: true
                     ssl:
                         enable: true
+logging:
+  aspect:
+      enabled: true
+      level: info

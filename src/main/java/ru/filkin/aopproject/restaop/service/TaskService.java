@@ -9,6 +9,7 @@ import ru.filkin.aopproject.restaop.kafka.TaskUpdateEvent;
 import ru.filkin.aopproject.restaop.model.Task;
 import ru.filkin.aopproject.restaop.model.TaskDTO;
 import ru.filkin.aopproject.restaop.repository.TaskRepository;
+import ru.filkin.starter.loggingspringbootstarter.annotation.CustomAnnotation;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class TaskService {
+
     private final TaskRepository taskRepository;
 
     @Autowired
@@ -30,6 +32,7 @@ public class TaskService {
         this.kafkaProducer = kafkaProducer;
     }
 
+    @CustomAnnotation
     public TaskDTO createTask(TaskDTO taskDTO) {
         Task task = new Task();
         task.setTitle(taskDTO.getTitle());
@@ -40,6 +43,7 @@ public class TaskService {
         return convertToDTO(savedTask);
     }
 
+    @CustomAnnotation
     public TaskDTO getTaskById(int id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Task not found"));
@@ -52,6 +56,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @CustomAnnotation
     public TaskDTO updateTask(int id, TaskDTO taskDTO) {
 
         Task task = taskRepository.findById(id)
@@ -72,6 +77,7 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
+    @CustomAnnotation
     public void deleteTask(int id) {
         if (!taskRepository.existsById(id)) {
             throw new NotFoundException("Task not found");
@@ -80,21 +86,22 @@ public class TaskService {
     }
 
     private TaskDTO convertToDTO(Task task) {
-        TaskDTO taskDTO = new TaskDTO();
-        taskDTO.setId(task.getId());
-        taskDTO.setTitle(task.getTitle());
-        taskDTO.setDescription(task.getDescription());
-        taskDTO.setUserId(task.getUserId());
-        taskDTO.setStatus(task.getStatus());
-        return taskDTO;
+        return TaskDTO.builder()
+                .id(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .userId(task.getUserId())
+                .status(task.getStatus())
+                .build();
     }
 
     private Task convertToEntity(TaskDTO taskDTO) {
-        Task task = new Task();
-        task.setTitle(taskDTO.getTitle());
-        task.setDescription(taskDTO.getDescription());
-        task.setUserId(taskDTO.getUserId());
-        task.setStatus(taskDTO.getStatus());
-        return task;
+        return Task.builder()
+                .id(taskDTO.getId())
+                .title(taskDTO.getTitle())
+                .description(taskDTO.getDescription())
+                .userId(taskDTO.getUserId())
+                .status(taskDTO.getStatus())
+                .build();
     }
 }
